@@ -37,7 +37,6 @@ affiliations:
    index: 2
  - name: Imperial College London
    index: 3
-<img width="468" height="650" alt="image" src="https://github.com/user-attachments/assets/f204bc4e-41f4-46e0-b75c-9c16eb595c12" />
 
 date: 17 March 2026
 bibliography: paper.bib
