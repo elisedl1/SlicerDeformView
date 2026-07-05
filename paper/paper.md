@@ -16,7 +16,7 @@ authors:
     equal-contrib: true
     affiliation: 1, 2
   - name: Étienne Léger
-    orcid: TODO
+    orcid: 0000-0001-5452-9266
     affiliation: 2
   - name: Taj Choksi
     orcid: 0009-0004-2793-410X
