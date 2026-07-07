@@ -111,7 +111,7 @@ Ten participants (technical researchers without clinical expertise, mean imaging
 As shown in \autoref{fig:user}, DeformView achieved higher mean scores than the Transform module across all four attributes (mean: 4.1/5.0 vs. 3.2/5.0; per-attribute mean range: 4.0–4.3 vs. 3.0–3.5). Improvements in helpfulness and intuitiveness reached statistical significance (p = 0.008 and p = 0.027, respectively). Overall, 80% of the participants preferred DeformView over Transform and 80% indicated they would choose DeformView for similar applications in the future. On the System Usability Scale, DeformView achieved an adjusted mean score of 82.8/100 (std: 14.6), which falls in the "excellent" usability range per established SUS benchmarks (above 80/100) `[@Bangor2009DeterminingWI:2009]`. 
 
 ![User study (n=10) results comparing our DeformView module and existing Transform module on four attributes
-(1–5 scale; green is better). DeformView significantly outperforms existing module on helpfulness (p=0.008) and intuition
+(1–5 scale; green is better). DeformView significantly outperforms existing module on helpfulness (p=0.008) and intuitiveness
 (p=0.027), with higher mean scores across all metrics.\label{fig:user}](figures/user_study.png)
 
 With the introduction of dense, quantitative colour maps for displacement magnitude and Jacobian determinant, DeformView provides an intuitive, Slicer compatible module that allows users to confidently interpret deformation fields in medical imaging tasks.
