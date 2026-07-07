@@ -24,10 +24,6 @@ To activate and use this module please follow these steps:
    3.  `Restart` Slicer
    4.  `Choose` the module under *Modules -> DeformView*.
 
-## Sample Data
-
-Example data (transformation file; moving and source images) have been included under the `TestData` folder.
-
 ## Contribute
 
 If you'd like to contribute, please first refer to the Slicer developer documentation [documentation for developers](https://www.slicer.org/wiki/Documentation/Nightly/Developers)
