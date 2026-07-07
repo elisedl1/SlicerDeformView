@@ -24,6 +24,18 @@ To activate and use this module please follow these steps:
    3.  `Restart` Slicer
    4.  `Choose` the module under *Modules -> DeformView*.
 
+## Running Software Validation Tests
+
+Before submitting a pull request, please run the module self-test to confirm nothing is broken. In Slicer, open the DeformView module and click **Reload and Test**, or run it from the Python console:
+
+```python
+import DeformView
+DeformView.DeformViewTest().runTest()
+```
+
+All tests should pass; any failure prints an assertion traceback. See the README's Testing section for details on what is checked.
+
+
 ## Contribute
 
 If you'd like to contribute, please first refer to the Slicer developer documentation [documentation for developers](https://www.slicer.org/wiki/Documentation/Nightly/Developers)
