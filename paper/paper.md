@@ -17,16 +17,16 @@ authors:
     affiliation: "1, 2"
   - name: Taj Choksi
     orcid: 0009-0004-2793-410X
-    affiliation: "3"
+    affiliation: 3
   - name: Étienne Léger
     orcid: 0000-0001-5452-9266
-    affiliation: "2"
+    affiliation: 2
   - name: Raphaël Christin
     orcid: 0009-0007-5769-9309
     affiliation: "1, 2"
   - name: Kaleem Siddiqi
     orcid: 0000-0002-7347-9716
-    affiliation: "1"
+    affiliation: 1
   - name: D. Louis Collins
     orcid: 0000-0002-8432-7021
     affiliation: "1, 2"
