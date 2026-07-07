@@ -97,6 +97,8 @@ This map renders the magnitude of the Jacobian determinant of the deformation fi
 ### Increment Transform:
 Rather than only displaying the final deformation, as existing modules do, the transformation is incrementally applied to the moving image across 10 discrete steps (0.1x, 0.2x, … 1.0x of the full transform), allowing users to observe how the deformation accumulates spatially. This is particularly useful for training and for diagnosing registration behaviour at intermediate stages.
 
+We visualize the difference between DeformView visualization compared to the existing 3D Slicer functionality in Transform module for both displaying displacement magnitude and local volume change (compression/ expansion) in \autoref{fig:four_plot}.
+
 ![DeformView visualizations (top row) versus existing Transform module visualizations (bottom row). Top left: DeformView displacement magnitude colour map. Top right: DeformView Jacobian colour map. Bottom left: Transform module glyph display. Bottom right: Transform module grid display.\label{fig:four_plot}](figures/labelled_4_plot.png)
 
 
