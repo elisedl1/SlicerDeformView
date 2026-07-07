@@ -38,14 +38,14 @@ affiliations:
  - name: Imperial College London
    index: 3
 
-date: 17 March 2026
+date: 4 July 2026
 bibliography: paper.bib
 
 ---
 
 # Summary
 
-DeformView is a new 3D Slicer module `[@fedorov2012:2012]` designed for dense, intuitive, and quantitative visualization of non-linear deformation fields for image registration. In addition to the local, sparse displacement vectors shown by the current Transform module in 3D Slicer, DeformView introduces two interactive, voxel-wise overlays: a displacement magnitude colour map (millimeters) and a Jacobian determinant colour map (percentage) encoding local volumetric expansion and compression. We additionally introduce real-time cursor interaction to enable point-wise deformation values to be displayed directly on the image volume. Additionally, an Increment Transform feature supports visualization of the progressive deformation over discrete steps. DeformView is available from our GitHub repository: https://github.com/elisedl1/DeformView, using the 3D Slicer Extension Wizard.
+DeformView is a new 3D Slicer module [@fedorov2012:2012] designed for dense, intuitive, and quantitative visualization of non-linear deformation fields for image registration. In addition to the local, sparse displacement vectors shown by the current Transform module in 3D Slicer, DeformView introduces two interactive, voxel-wise overlays: a displacement magnitude colour map (millimeters) and a Jacobian determinant colour map (percentage) encoding local volumetric expansion and compression. We additionally introduce real-time cursor interaction to enable point-wise deformation values to be displayed directly on the image volume. Additionally, an Increment Transform feature supports visualization of the progressive deformation over discrete steps. DeformView is available from our GitHub repository: https://github.com/elisedl1/DeformView, using the 3D Slicer Extension Wizard.
 
 
 # Statement of need
