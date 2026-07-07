@@ -1,4 +1,4 @@
-# Contributing to SlicerSPECTRecon
+# Contributing to DeformView
 
 Thank you for your interest in contributing to DeformView! If you wish to contribute:
 
@@ -10,7 +10,7 @@ Thank you for your interest in contributing to DeformView! If you wish to contri
 **New Features**
 
 The recommended method of contributing is as follows:
-1. Create an issue on the [issues page]([https://github.com/PyTomography/slicer_spect_recon/issues](https://github.com/elisedl1/DeformView/issues))
+1. Create an issue on the [issues page]([https://github.com/elisedl1/DeformView/issues](https://github.com/elisedl1/DeformView/issues))
 2. Fork the repository to your own GitHub account
 3. Fix issue and push changes to your own fork on GitHub
 4. Create a pull request from your fork and branch to the development branch in the main repository
