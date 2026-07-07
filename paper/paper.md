@@ -77,7 +77,7 @@ A key design principle of DeformView is compatibility, both with Slicer's data m
 
 # Research Impact Statement
 
-DeformView has generated demonstrable interest from the medical imaging research community beyond its core development team. The module was presented at NA-MIC Project Week 43 and 44 [@KAPUR2016176; @NAMIC_PW43_2025; @NAMIC_PW44_2026], the biannual workshop hosted by the National Alliance for Medical Image Computing (NA-MIC), the organization responsible for the continued development of 3D Slicer. DeformView generated discussion among Slicer developers and requests for adoption from external research groups, including for applications in orofacial surgery and mechanical engineering. The DeformView module has also been used in ongoing research on groupwise ultrasound-CT image registration for spinal surgery [@elise2024].
+DeformView has generated demonstrable interest from the medical imaging research community beyond its core development team. The module was presented at NA-MIC Project Week 43 and 44 [@Kapur2016; @NAMIC_PW43_2025; @NAMIC_PW44_2026], the biannual workshop hosted by the National Alliance for Medical Image Computing (NA-MIC), the organization responsible for the continued development of 3D Slicer. DeformView generated discussion among Slicer developers and requests for adoption from external research groups, including for applications in orofacial surgery and mechanical engineering. The DeformView module has also been used in ongoing research on groupwise ultrasound-CT image registration for spinal surgery [@elise2024].
 
 This work was additionally presented as a peer-reviewed poster at the Imaging Network of Ontario (ImNO) 2026 symposium in the Image-Guided Intervention and Surgery category [@imno]. 
 
