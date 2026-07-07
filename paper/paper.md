@@ -15,12 +15,12 @@ authors:
     orcid: 0009-0000-4634-9118
     equal-contrib: true
     affiliation: 1, 2
-  - name: Étienne Léger
-    orcid: 0000-0001-5452-9266
-    affiliation: 2
   - name: Taj Choksi
     orcid: 0009-0004-2793-410X
     affiliation: 3
+  - name: Étienne Léger
+    orcid: 0000-0001-5452-9266
+    affiliation: 2
   - name: Raphaël Christin
     orcid: 0009-0007-5769-9309
     affiliation: 1, 2
