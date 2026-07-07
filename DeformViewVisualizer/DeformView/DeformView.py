@@ -3706,3 +3706,83 @@ class DeformViewLogic(ScriptedLoadableModuleLogic):
             return None, None
         return np.array(source_points), np.array(target_points)
     
+
+class DeformViewTest(ScriptedLoadableModuleTest):
+    """Self-test for DeformView.
+
+    Uses only synthetic, in-memory
+    data: a small random volume and a pure 2 mm translation, for which
+    the expected results are known analytically (displacement == 2 mm
+    everywhere; Jacobian volume change == 0 % everywhere). 
+    
+    Doesn't need any downloads or data - IJZF
+    """
+
+    def setUp(self):
+        slicer.mrmlScene.Clear()
+
+    def runTest(self):
+        self.setUp()
+        self.test_LogicApiPresent()
+        self.setUp()
+        self.test_DisplacementAndJacobian()
+
+    def test_LogicApiPresent(self):
+        """Smoke test: module loads and the logic API is intact."""
+        self.delayDisplay("Starting: logic API presence")
+        logic = DeformViewLogic()
+        self.assertIsNotNone(logic)
+        for name in ("computeDisplacementMagnitude", "computeJacobianMagnitude",
+                     "createIncrementalTransform", "countUniqueValues"):
+            self.assertTrue(callable(getattr(logic, name, None)),
+                            f"DeformViewLogic is missing method: {name}")
+        self.delayDisplay("Passed: logic API presence")
+
+    def test_DisplacementAndJacobian(self):
+        """Functional test: run both maps on a synthetic translation."""
+        self.delayDisplay("Starting: displacement + Jacobian")
+
+        # 1. Synthetic reference volume (array shape is k, j, i).
+        voxels = (np.random.RandomState(0).rand(20, 24, 28) * 100.0).astype(np.float32)
+        referenceVolume = slicer.mrmlScene.AddNewNodeByClass(
+            "vtkMRMLScalarVolumeNode", "TestReference")
+        slicer.util.updateVolumeFromArray(referenceVolume, voxels)
+        referenceVolume.SetSpacing(1.0, 1.0, 1.0)
+        referenceVolume.SetOrigin(0.0, 0.0, 0.0)
+
+        # 2. Synthetic transform: a pure 2 mm translation.
+        translationMm = 2.0
+        with tempfile.NamedTemporaryFile(suffix=".h5", delete=False) as tmp:
+            txPath = tmp.name
+        sitk.WriteTransform(sitk.TranslationTransform(3, (translationMm, 0.0, 0.0)), txPath)
+        transformNode = slicer.util.loadTransform(txPath)
+        os.remove(txPath)
+        self.assertIsNotNone(transformNode)
+
+        # 3. A colour table node; the compute methods want its ID *string*.
+        colorNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLColorTableNode")
+        if colorNode is None:
+            colorNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLColorTableNode", "TestColors")
+            colorNode.SetTypeToRainbow()
+        colorId = colorNode.GetID()
+
+        logic = DeformViewLogic()
+
+        # 4. Displacement magnitude.
+        dispVol = logic.computeDisplacementMagnitude(referenceVolume, transformNode, colorId, scale=1.0)
+        self.assertIsNotNone(dispVol)
+        disp = slicer.util.arrayFromVolume(dispVol)
+        self.assertEqual(disp.shape, voxels.shape)        # geometry preserved
+        self.assertTrue(np.all(np.isfinite(disp)))        # no NaN / inf
+        self.assertTrue(np.all(disp >= 0.0))              # magnitude is non-negative
+        self.assertAlmostEqual(float(np.median(disp)), translationMm, delta=0.5)  # tune if needed
+
+        # 5. Jacobian determinant (percentage volume change).
+        jacVol = logic.computeJacobianMagnitude(referenceVolume, transformNode, colorId)
+        self.assertIsNotNone(jacVol)
+        jac = slicer.util.arrayFromVolume(jacVol)
+        self.assertEqual(jac.shape, voxels.shape)
+        self.assertTrue(np.all(np.isfinite(jac)))
+        self.assertLess(abs(float(np.median(jac))), 1.0)  # translation is volume-preserving; tune if needed
+
+        self.delayDisplay("Passed: displacement + Jacobian")

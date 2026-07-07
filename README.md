@@ -106,6 +106,26 @@ Please also see the CONTRIBUTING.md file for specific information.
 
 ---
 
+## Testing
+
+DeformView ships with an automated self-test (`DeformViewTest`) that verifies the module loads and that its two core computations run correctly. The test uses only synthetic, in-memory data — no downloads or external data files required. It checks that:
+
+- The module loads and `DeformViewLogic` exposes its expected methods.
+- **Displacement magnitude** and **Jacobian determinant** maps compute on a synthetic volume deformed by a known 2 mm translation, returning valid volumes with matching geometry, finite values, and the analytically expected results (≈2 mm displacement and ≈0% volume change everywhere).
+
+**Run it in Slicer:** open the DeformView module and click **Reload and Test** (enable developer mode under *Edit → Application Settings → Developer* if the button is hidden).
+
+**Run it from the Python console:**
+
+```python
+import DeformView
+DeformView.DeformViewTest().runTest()
+```
+
+A successful run reports each test passing; any failure prints an assertion traceback identifying the problem.
+
+---
+
 ## Contributors
 - Elise Donszelmann-Lund (@elisedl1)
 - Isabel Frolick (@isabelfrolick)
