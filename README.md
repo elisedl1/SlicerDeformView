@@ -33,7 +33,7 @@ Download and install **3D Slicer** from the official website: [https://www.slice
 
 1. **Clone the repository**
    ```bash
-   git clone [repository-url]
+   git clone https://github.com/elisedl1/DeformView
    ```
 
 2. **Open 3D Slicer**
@@ -54,11 +54,6 @@ Download and install **3D Slicer** from the official website: [https://www.slice
 
 ---
 
-## Sample Data
-Example data (transformation file; moving and source images) have been included under the `TestData` folder. 
-
----
-
 ## Panels and Their Use
 
 ### Input Selection
@@ -74,7 +69,7 @@ Example data (transformation file; moving and source images) have been included 
 ### Compute Displacement Field Mapping
 - Computes both:
   - **Dense displacement magnitude volume (mm)**
-  - **Dense Jacobian determinant magnitude volume (%)**
+  - **Dense Jacobian determinant volume (%)**
 - Automatically:
   - Loads the fixed volume into the scene
   - Applies **100% of the transformation**
@@ -123,4 +118,6 @@ Isabel Frolick, Elise Donszelmann-Lund, raph-rc, Étienne Léger, & TC2423. (202
 
 
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.19008734.svg)](http://dx.doi.org/10.5281/zenodo.19008734)
+
+
 
