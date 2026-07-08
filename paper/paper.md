@@ -33,9 +33,9 @@ authors:
 affiliations:
  - name: McGill University, Canada
    index: 1
- - name: Montreal Neurological Institute
+ - name: Montreal Neurological Institute, Canada
    index: 2
- - name: Imperial College London
+ - name: Imperial College London, United Kingdom
    index: 3
 
 date: 4 July 2026
@@ -120,5 +120,7 @@ With the introduction of dense, quantitative colour maps for displacement magnit
 
 # AI usage disclosure
 
-Generative AI tools (Claude Sonnet 4.6) were used in the development of this software, specifically for debugging purposes. Authors have reviewed and validated all AI-assisted code output and made all core design decisions. AI was not used for writing this manuscript, or the preparation of supporting materials.  
+Generative AI tools (Claude Sonnet 4.6) were used in the development of this software, specifically for debugging purposes. Authors have reviewed and validated all AI-assisted code output and made all core design decisions. AI was not used for writing this manuscript, or the preparation of supporting materials. 
+
+# References
 
