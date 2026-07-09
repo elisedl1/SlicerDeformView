@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
 
-project(DeformViewVisualizer)
+project(DeformView)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/DeformViewVisualizer")
-set(EXTENSION_CONTRIBUTORS "John Doe (AnyWare Corp.)")
-set(EXTENSION_DESCRIPTION "This is an example of a simple extension")
-set(EXTENSION_ICONURL "https://www.example.com/Slicer/Extensions/DeformViewVisualizer.png")
-set(EXTENSION_SCREENSHOTURLS "https://www.example.com/Slicer/Extensions/DeformViewVisualizer/Screenshots/1.png")
+set(EXTENSION_HOMEPAGE "https://github.com/elisedl1/SlicerDeformView")
+set(EXTENSION_CONTRIBUTORS "Isabel Frolick (McGill University), Elise Donszelmann-Lund (McGill University)")
+set(EXTENSION_DESCRIPTION "Dense, quantitative visualization and analysis of non-linear deformation fields, including per-voxel displacement magnitude and Jacobian determinant maps.")
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/elisedl1/DeformView/main/DeformView/Resources/Icons/DeformView.png")
+set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/elisedl1/DeformView/main/exampleImages/main_UI.png")
 set(EXTENSION_DEPENDS "NA") # Specified as a list or "NA" if no dependencies
 
 #-----------------------------------------------------------------------------
