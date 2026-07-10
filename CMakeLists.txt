@@ -7,8 +7,8 @@ project(DeformView)
 set(EXTENSION_HOMEPAGE "https://github.com/elisedl1/SlicerDeformView")
 set(EXTENSION_CONTRIBUTORS "Isabel Frolick (McGill University), Elise Donszelmann-Lund (McGill University)")
 set(EXTENSION_DESCRIPTION "Dense, quantitative visualization and analysis of non-linear deformation fields, including per-voxel displacement magnitude and Jacobian determinant maps.")
-set(EXTENSION_ICONURL "https://raw.githubusercontent.com/elisedl1/DeformView/main/DeformView/Resources/Icons/DeformView.png")
-set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/elisedl1/DeformView/main/exampleImages/main_UI.png")
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/elisedl1/SlicerDeformView/main/DeformView/Resources/Icons/DeformView.png")
+set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/elisedl1/SlicerDeformView/main/exampleImages/main_UI.png")
 set(EXTENSION_DEPENDS "NA") # Specified as a list or "NA" if no dependencies
 
 #-----------------------------------------------------------------------------
