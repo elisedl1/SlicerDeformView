@@ -6,7 +6,7 @@ It enables users to interpret deformations using **dense, voxel-wise maps**, giv
 
 DeformView provides two complementary visualization maps:
 1. **Displacement Magnitude Map (mm)** – shows local tissue displacement.  
-2. **Jacobian Determinant Magnitude (%)** – shows local tissue expansion or compression.
+2. **Jacobian Determinant Map (%)** – shows local tissue expansion or compression.
 
 A **real-time cursor display** allows users to hover over any voxel and directly view the corresponding **displacement or Jacobian value**.
 
@@ -38,19 +38,17 @@ Download and install **3D Slicer** from the official website: [https://www.slice
 
 2. **Open 3D Slicer**
 
-3. **Access Extension Wizard**
+3. **Open the Extension Wizard**
    - Navigate to: `Module Search` → `Extension Wizard`
 
-4. **Select Extension**
-   - Click **"Select Extension"** to add additional module paths
-   - Browse and select the folder where you cloned the DeformView repository
+4. **Select the extension**
+   - Click **"Select Extension"**
+   - Choose the **`DeformView` folder inside the cloned repository** (i.e. `SlicerDeformView/DeformView`, the folder containing `DeformView.py`) — not the repository root
 
-5. **Reload Slicer**
-   - Restart 3D Slicer to load the new extension
+5. **Restart 3D Slicer**
 
-6. **Access DeformView**
-   - Use the search bar in the modules dropdown
-   - Type "DeformView" to locate and launch the module
+6. **Open DeformView**
+   - Use the modules dropdown search bar and type "DeformView"
 
 ---
 
@@ -58,7 +56,7 @@ Download and install **3D Slicer** from the official website: [https://www.slice
 
 ### Input Selection
 - **Moving Image**  
-  Image after the transformation has been applied.
+   Source before transformation and the transform maps it onto the fixed image.
 - **Fixed Image**  
   Reference image.
 - **Transformation**  
@@ -99,6 +97,7 @@ Download and install **3D Slicer** from the official website: [https://www.slice
 - A valid transformation must be provided to compute deformation maps.
 
 ---
+## Contributing
 
 If you'd like to contribute, please first refer to the Slicer developer documentation https://www.slicer.org/wiki/Documentation/Nightly/Developers
 
@@ -129,6 +128,9 @@ A successful run reports each test passing; any failure prints an assertion trac
 ## Contributors
 - Elise Donszelmann-Lund (@elisedl1)
 - Isabel Frolick (@isabelfrolick)
+- Taj Choksi (@TC2423)
+- Étienne Léger (@errollgarner)
+- Raphaël Christin (@raph-rc)
 
 ---
 
