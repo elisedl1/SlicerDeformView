@@ -33,7 +33,7 @@ Download and install **3D Slicer** from the official website: [https://www.slice
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/elisedl1/DeformView
+   git clone https://github.com/elisedl1/SlicerDeformView
    ```
 
 2. **Open 3D Slicer**
