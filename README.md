@@ -136,8 +136,10 @@ To cite this work:
 
 Isabel Frolick, Elise Donszelmann-Lund, raph-rc, Étienne Léger, & TC2423. (2026). elisedl1/DeformView: DeformView (1.0). Zenodo. https://doi.org/10.5281/zenodo.19008734
 
-
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.19008734.svg)](http://dx.doi.org/10.5281/zenodo.19008734)
 
+---
+## License
 
+DeformView is distributed under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
 
