@@ -53,14 +53,22 @@ class DeformView(ScriptedLoadableModule):
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
         self.parent.title = _("DeformView")
-        self.parent.categories = [translate("qSlicerAbstractCoreModule", "Examples")]
+        self.parent.categories = [translate("qSlicerAbstractCoreModule", "Registration")]
         self.parent.dependencies = [] 
-        self.parent.contributors = [" Isabel Frolick (McGill), Elise Donszelmann-Lund (McGill)"]  
+        self.parent.contributors = [
+            "Isabel Frolick (McGill University)",
+            "Elise Donszelmann-Lund (McGill University)",
+        ]
         self.parent.helpText = _("""
-            Dense deformation visualization module.
-            See more information in <a href="https://github.com/organization/projectname#DeformView">module documentation</a>.
+            Dense, quantitative visualization of non-linear deformation fields, including
+            per-voxel displacement magnitude (mm) and Jacobian determinant maps of local
+            volumetric change.
+            See <a href="https://github.com/elisedl1/SlicerDeformView">module documentation</a>.
             """)
-        self.parent.acknowledgementText = _(""" """)
+        self.parent.acknowledgementText = _("""
+            This work was developed at the
+            Montreal Neurological Institute, McGill University.
+            """)
 
 #
 # DeformViewParameterNode
