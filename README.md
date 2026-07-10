@@ -136,10 +136,9 @@ A successful run reports each test passing; any failure prints an assertion trac
 
 To cite this work:
 
-Isabel Frolick, Elise Donszelmann-Lund, raph-rc, Étienne Léger, & TC2423. (2026). elisedl1/DeformView: DeformView (1.0). Zenodo. https://doi.org/10.5281/zenodo.19008734
+Frolick, I., Donszelmann-Lund, E., Choksi, T., Léger, É., Christin, R., Siddiqi, K., & Collins, D. L. (2026). *DeformView: Quantitative Visualization of Non-Linear Deformation Fields* (Version 1.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21287630
 
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.19008734.svg)](http://dx.doi.org/10.5281/zenodo.19008734)
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19008733.svg)](https://doi.org/10.5281/zenodo.19008733)
 ---
 ## License
 
