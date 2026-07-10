@@ -1,0 +1,24 @@
+{
+  "upload_type": "software",
+  "title": "DeformView: Quantitative Visualization of Non-Linear Deformation Fields",
+  "description": "DeformView provides intuitive, quantitative visualization of non-linear deformation fields within the 3D Slicer platform, including per-voxel displacement magnitude and Jacobian determinant maps.",
+  "license": "mit",
+  "access_right": "open",
+  "language": "eng",
+  "keywords": [
+    "Medical Imaging",
+    "Image Registration",
+    "Non-linear Deformation",
+    "Visualization",
+    "3D Slicer"
+  ],
+  "creators": [
+    {"name": "Frolick, Isabel", "orcid": "0009-0001-5947-6973", "affiliation": "McGill University, Montreal Neurological Institute"},
+    {"name": "Donszelmann-Lund, Elise", "orcid": "0009-0000-4634-9118", "affiliation": "McGill University, Montreal Neurological Institute"},
+    {"name": "Choksi, Taj", "orcid": "0009-0004-2793-410X", "affiliation": "Imperial College London"},
+    {"name": "Léger, Étienne", "orcid": "0000-0001-5452-9266", "affiliation": "Montreal Neurological Institute"},
+    {"name": "Christin, Raphaël", "orcid": "0009-0007-5769-9309", "affiliation": "McGill University, Montreal Neurological Institute"},
+    {"name": "Siddiqi, Kaleem", "orcid": "0000-0002-7347-9716", "affiliation": "McGill University"},
+    {"name": "Collins, D. Louis", "orcid": "0000-0002-8432-7021", "affiliation": "McGill University, Montreal Neurological Institute"}
+  ]
+}
