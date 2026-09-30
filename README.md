@@ -76,7 +76,7 @@ Download and install **3D Slicer** from the official website: [https://www.slice
 ### Increment Slider
 - Controls the **step size** of the applied transformation
 - Allows visualization of **0–100% of the transformation**
-
+- Displacement magnitudes at intermediate steps are exact; **Jacobian (volume change) values at intermediate steps are a linear approximation** of the full-transform values and are only exact at 0% and 100%.
 ![](exampleImages/increment.gif)
 
 ---
@@ -107,12 +107,21 @@ Please also see the CONTRIBUTING.md file for specific information.
 
 ## Testing
 
-DeformView ships with an automated self-test (`DeformViewTest`) that verifies the module loads and that its two core computations run correctly. The test uses only synthetic, in-memory data — no downloads or external data files required. It checks that:
+DeformView ships with an automated self-test (`DeformViewTest`, in `DeformView/DeformViewTesting.py`) that checks the module loads and that its computations match analytic ground truth at every voxel. The tests use only synthetic, in-memory data, so no downloads or external data files are needed. Reference volumes use anisotropic voxel spacing so that errors in spacing or orientation handling are caught.
 
-- The module loads and `DeformViewLogic` exposes its expected methods.
-- **Displacement magnitude** and **Jacobian determinant** maps compute on a synthetic volume deformed by a known 2 mm translation, returning valid volumes with matching geometry, finite values, and the analytically expected results (≈2 mm displacement and ≈0% volume change everywhere).
+The suite covers:
 
-**Run it in Slicer:** open the DeformView module and click **Reload and Test** (enable developer mode under *Edit → Application Settings → Developer* if the button is hidden).
+- **Logic API presence:** the module loads and `DeformViewLogic` exposes its expected methods.
+- **Basic displacement + Jacobian:** a 2 mm translation produces valid volumes with matching geometry, finite values, ≈2 mm displacement and ≈0% volume change.
+- **Translation (analytic):** for an oblique translation **t**, displacement magnitude equals ‖**t**‖ and volume change equals 0% at every voxel.
+- **Affine scaling, default orientation:** for uniform expansion, uniform compression and a per-axis stretch **A** about centre **c**, displacement magnitude equals ‖(**A**−**I**)(**x**−**c**)‖ at every voxel, and volume change equals (det **A** − 1)×100% at every interior voxel.
+- **Increment Transform:** applying 50% of a two-voxel translation reproduces an exact one-voxel shift of the source image.
+- **Affine scaling, oblique orientation:** the per-axis stretch and a general affine with shear give exact displacement and volume change on a reference volume tilted relative to the scanner axes, as in oblique clinical acquisitions.
+- **Grid transform (analytic):** the same analytic field, loaded as a non-linear grid (displacement-field) transform on default and oblique volumes, gives exact displacement and volume change.
+
+Analytic comparisons use tolerances of 10⁻³ mm for displacement, 10⁻² % for volume change and 10⁻³ for image intensity.
+
+**Run it in Slicer:** open the DeformView module and click **Reload and Test**. If the button is hidden, enable developer mode under *Edit → Application Settings → Developer*.
 
 **Run it from the Python console:**
 
@@ -121,7 +130,45 @@ import DeformView
 DeformView.DeformViewTest().runTest()
 ```
 
-A successful run reports each test passing; any failure prints an assertion traceback identifying the problem.
+### Viewing test results
+
+A successful run logs `Passed:` for each test. Any failure prints an assertion traceback showing the measured error and the tolerance it exceeded. The maximum error for each analytic case is written to the Slicer log.
+
+In practice, outputs match the analytic values to floating-point precision. Our results (3D Slicer 5.8.1, macOS Tahoe 26.6.2):
+
+```
+Starting: logic API presence
+Passed: logic API presence
+Starting: displacement + Jacobian
+Passed: displacement + Jacobian
+Starting: translation (analytic)
+DeformViewTest translation displacement (mm): max abs error = 0.000e+00
+DeformViewTest translation volume change (%): max abs error = 0.000e+00
+Passed: translation (analytic)
+Starting: affine scaling (analytic)
+DeformViewTest uniform expansion displacement (mm): max abs error = 1.288e-14
+DeformViewTest uniform expansion volume change (%): max abs error = 5.542e-13
+DeformViewTest uniform compression displacement (mm): max abs error = 1.243e-14
+DeformViewTest uniform compression volume change (%): max abs error = 2.771e-13
+DeformViewTest per-axis stretch displacement (mm): max abs error = 4.441e-15
+DeformViewTest per-axis stretch volume change (%): max abs error = 1.776e-13
+Passed: affine scaling (analytic)
+Starting: incremental transform
+DeformViewTest incremental 50% shift (intensity): max abs error = 0.000e+00
+Passed: incremental transform
+Starting: affine scaling on oblique volume
+DeformViewTest oblique per-axis stretch displacement (mm): max abs error = 9.326e-15
+DeformViewTest oblique per-axis stretch volume change (%): max abs error = 2.665e-13
+DeformViewTest oblique general affine displacement (mm): max abs error = 1.155e-14
+DeformViewTest oblique general affine volume change (%): max abs error = 7.319e-13
+Passed: affine scaling on oblique volume
+Starting: grid transform (analytic)
+DeformViewTest grid general affine displacement (mm): max abs error = 3.109e-15
+DeformViewTest grid general affine volume change (%): max abs error = 4.654e-13
+DeformViewTest grid general affine, oblique volume displacement (mm): max abs error = 4.441e-15
+DeformViewTest grid general affine, oblique volume volume change (%): max abs error = 3.766e-13
+Passed: grid transform (analytic)
+```
 
 ---
 
