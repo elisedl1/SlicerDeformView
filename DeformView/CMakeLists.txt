@@ -4,6 +4,7 @@ set(MODULE_NAME DeformView)
 #-----------------------------------------------------------------------------
 set(MODULE_PYTHON_SCRIPTS
   ${MODULE_NAME}.py
+  ${MODULE_NAME}Testing.py
   )
 
 set(MODULE_PYTHON_RESOURCES
