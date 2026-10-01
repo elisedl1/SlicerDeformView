@@ -45,7 +45,7 @@ bibliography: paper.bib
 
 # Summary
 
-DeformView is a new 3D Slicer module [@fedorov2012] designed for dense, intuitive, and quantitative visualization of non-linear deformation fields for image registration. In addition to the local, sparse displacement vectors shown by the current Transform module in 3D Slicer, DeformView introduces two interactive, voxel-wise overlays: a displacement magnitude colour map (millimeters) and a Jacobian determinant colour map (percentage) encoding local volumetric expansion and compression. We additionally introduce real-time cursor interaction to enable point-wise deformation values to be displayed directly on the image volume. As well, an Increment Transform feature supports visualization of the progressive deformation over discrete steps. DeformView is available from our GitHub repository: https://github.com/elisedl1/DeformView, using the 3D Slicer Extension Wizard.
+DeformView is a new 3D Slicer module [@fedorov2012] designed for dense, intuitive, and quantitative visualization of non-linear deformation fields for image registration. In addition to the local, sparse displacement vectors shown by the current Transform module in 3D Slicer, DeformView introduces two interactive, voxel-wise overlays: a displacement magnitude colour map (millimeters) and a Jacobian determinant colour map (percentage) encoding local volumetric expansion and compression. We additionally introduce real-time cursor interaction to enable point-wise deformation values to be displayed directly on the image volume. As well, an Increment Transform feature supports visualization of the progressive deformation over discrete steps. DeformView is available from our GitHub repository: https://github.com/elisedl1/SlicerDeformView, using the 3D Slicer Extension Wizard.
 
 
 # Statement of need
@@ -70,7 +70,7 @@ However, all three representations are sampled at a subset of voxel locations. A
 
 DeformView is implemented as a Python extension for 3D Slicer, an open-source platform available on Linux, macOS, and Windows under a BSD-style license. Most Slicer basic infrastructure is implemented in C++ and made available in Python using PythonQt and VTK Python Wrapper [@Kapur2016]. The DeformView module is developed using Python following community guidelines for Slicer extension development and built from the official Slicer extension template to ensure consistency and modularity with the Slicer ecosystem [@fedorov2012].
 
-A key design principle of DeformView is compatibility, both with Slicer's data model and with existing modules. All input selectors expose only the data types relevant to each function: for example, the transformation input only accepts transform types available in Slicer (linear, BSpline, grid, thin-plate spline, and composite) [@Slicer_Transforms]. As well, DeformView is designed to operate in conjunction with existing Slicer tools. For example, the DeformView colour maps can be displayed alongside the sparse overlays of the existing Transform module. As shown in \autoref{fig:glyph}, this combination of the displacement magnitude colour map and glyphs provides both a quantified, spatially localized interpretation and an intuitive representation of local direction change. DeformView includes an automated self-test (built on Slicer's `ScriptedLoadableModuleTest` framework) that verifies module loading and validates its computations against known analytic ground truth without the need for additional downloads or external files, see Validation or the repository README for instructions.
+A key design principle of DeformView is compatibility, both with Slicer's data model and with existing modules. All input selectors expose only the data types relevant to each function: for example, the transformation input only accepts transform types available in Slicer (linear, B-spline, grid, thin-plate spline, and composite) [@Slicer_Transforms]. As well, DeformView is designed to operate in conjunction with existing Slicer tools. For example, the DeformView colour maps can be displayed alongside the sparse overlays of the existing Transform module. As shown in \autoref{fig:glyph}, this combination of the displacement magnitude colour map and glyphs provides both a quantified, spatially localized interpretation and an intuitive representation of local direction change. DeformView includes an automated self-test (built on Slicer's `ScriptedLoadableModuleTest` framework) that verifies the DeformView module without the need for additional downloads or external files, see Validation or the repository README for instructions.
  
 ![Integration of DeformView displacement magnitude and existing Transform glyph visualization.\label{fig:glyph}](figures/glyph_overlay.png)
 
@@ -94,7 +94,7 @@ The first new dense colour map renders the Euclidean magnitude of the displaceme
 ### Jacobian Determinant Map
 This map renders the Jacobian determinant of the deformation field at every voxel as a percentage of local volumetric change, indicating whether a region has expanded or contracted under the deformation [@chung2001]. Tissue expansion (percentage > 0%) is rendered in red, tissue compression (percentage < 0%) in blue, and no change (percentage = 0%) in white, as shown in \autoref{fig:four_plot}. This allows researchers to identify changes to anatomical regions or areas of physiologically implausible deformation that may indicate registration errors.
 
-### Increment Transform:
+### Increment Transform
 Rather than only displaying the final deformation, as existing modules do, the transformation is incrementally applied to the source image across 10 discrete steps (0.1x, 0.2x, … 1.0x of the full transform), allowing users to observe how the deformation accumulates spatially. This is particularly useful for training and for diagnosing registration behaviour at intermediate stages. It should be noted that, while displacement magnitudes at intermediate steps are exact, intermediate Jacobian values are a linear approximation of the full-transform values. 
 
 We visualize the difference between DeformView visualization compared to the existing 3D Slicer functionality in Transform module for both displaying displacement magnitude and local volume change (compression/ expansion) in \autoref{fig:four_plot}.
@@ -110,17 +110,13 @@ DeformView includes an automated self-test built on Slicer's `ScriptedLoadableMo
 |---|---|---|---|---|
 | Translation; affine (default and oblique orientation) | Linear | Analytic | < 10^-13^ mm | < 10^-14^ |
 | Affine (default and oblique orientation) | Grid | Analytic | < 10^-13^ mm | < 10^-14^ |
-| Non-linear sinusoidal | Grid | Analytic | < 10^-13^ mm | 1.6 × 10^-3^ |
-| Non-linear smooth curved | B-spline | Slicer evaluation | < 10^-13^ mm | 1.8 × 10^-4^ |
-| Non-linear smooth curved | Thin-plate spline | Slicer evaluation | < 10^-13^ mm | 1.1 × 10^-5^ |
+| Sinusoidal (non-linear) | Grid | Analytic | < 10^-13^ mm | 1.6 × 10^-3^ |
+| Smooth curved (non-linear) | B-spline | Slicer evaluation | < 10^-13^ mm | 1.8 × 10^-4^ |
+| Smooth curved (non-linear) | Thin-plate spline | Slicer evaluation | < 10^-13^ mm | 1.1 × 10^-5^ |
 
 : Maximum absolute error against the reference. All tests use anisotropic voxel spacing. Jacobian errors are over interior voxels; curved-field values are at 0.5–0.75 mm spacing. \label{tab:validation}
 
-From \autoref{tab:validation}, DeformView reproduces every linear deformation field to floating-point precision. On non-linear deformation fields (sinusoidal grid, B-spline, TPS), the Jacobian determinant has a small discretization error because DeformView estimates derivatives by central differences between neighbouring voxels. At every interior voxel, the difference from the reference Jacobian determinant stayed within the theoretical central-difference bound and fell 3.7-4.0x when voxel spacing was halved, as expected for second-order (h^2^) accuracy. The largest error at 0.5-0.75 mm spacing was 1.6x10^-3^ on the non-linear sinusoidal grid, which was deliberately strongly curved (determinant ranges from 0.44 to 1.89; volume change -56% to +89%) across the field. On less strongly curved non-linear fields, much smaller errors occurred: 1.8x10^-4^ for the B-spline field and 1.1x10^-5^ for the TPS field. 
-
-
-
-
+From \autoref{tab:validation}, DeformView reproduces every linear deformation field to floating-point precision. On non-linear deformation fields (sinusoidal grid, B-spline, TPS), the Jacobian determinant has a small discretization error because DeformView estimates derivatives by central differences between neighbouring voxels. At every interior voxel, the difference from the reference Jacobian determinant stayed within the theoretical central-difference bound and fell 3.7-4.0x when voxel spacing was halved, as expected for second-order (h^2^) accuracy. The largest error at 0.5-0.75 mm spacing was 1.6x10^-3^ on the sinusoidal grid, which was deliberately strongly curved (determinant ranges from 0.44 to 1.89; volume change -56% to +89%) across the field. On less strongly curved non-linear fields, much smaller errors occurred: 1.8x10^-4^ for the B-spline field and 1.1x10^-5^ for the TPS field. 
 
 
 # AI usage disclosure
