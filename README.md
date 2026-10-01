@@ -107,20 +107,20 @@ Please also see the CONTRIBUTING.md file for specific information.
 
 ## Testing
 
-DeformView ships with an automated self-test (`DeformViewTest`, in `DeformView/DeformViewTesting.py`) that checks the module loads and that its computations match analytic ground truth at every voxel. The tests use only synthetic, in-memory data, so no downloads or external data files are needed. Reference volumes use anisotropic voxel spacing so that errors in spacing or orientation handling are caught.
+DeformView comes with an automated self-test (`DeformViewTest`, in `DeformView/DeformViewTesting.py`) that checks the module loads and that its computations match analytic ground truth at every voxel. The tests use only synthetic, in-memory data, so no downloads or external data files are needed. Reference volumes use anisotropic voxel spacing so that errors in spacing or orientation handling are caught.
 
 The suite covers:
 
 - **Logic API presence:** the module loads and `DeformViewLogic` exposes its expected methods.
 - **Basic displacement + Jacobian:** a 2 mm translation produces valid volumes with matching geometry, finite values, ≈2 mm displacement and ≈0% volume change.
-- **Translation (analytic):** for an oblique translation **t**, displacement magnitude equals ‖**t**‖ and volume change equals 0% at every voxel.
+- **Translation (analytic):** for a diagonal translation **t**, displacement magnitude equals ‖**t**‖ and volume change equals 0% at every voxel.
 - **Affine scaling, default orientation:** for uniform expansion, uniform compression and a per-axis stretch **A** about centre **c**, displacement magnitude equals ‖(**A**−**I**)(**x**−**c**)‖ at every voxel, and volume change equals (det **A** − 1)×100% at every interior voxel.
 - **Increment Transform:** applying 50% of a two-voxel translation reproduces an exact one-voxel shift of the source image.
 - **Affine scaling, oblique orientation:** the per-axis stretch and a general affine with shear give exact displacement and volume change on a reference volume tilted relative to the scanner axes, as in oblique clinical acquisitions.
-- **Grid transform (analytic):** the same analytic field, loaded as a non-linear grid (displacement-field) transform on default and oblique volumes, gives exact displacement and volume change.
-- **Non-linear fields (grid, B-spline, thin-plate spline):** smooth curved fields at two voxel spacings. Displacement matches the transform exactly; volume change stays within the theoretical central-difference truncation bound (proportional to spacing²) at every interior voxel, and the error falls by ~4× when the spacing is halved.
+- **Grid transform (analytic):** the general affine field, loaded as a non-linear grid (displacement-field) transform on default and oblique volumes, gives exact displacement and volume change.
+- **Non-linear fields (grid, B-spline, thin-plate spline):** curved fields tested at two voxel spacings. Displacement matches the analytic field (grid) or Slicer's independent evaluation of the transform (B-spline, TPS) to about 10⁻¹³ mm. Volume change stays within the theoretical central-difference truncation bound (proportional to spacing²) at every interior voxel, and the error falls by 3.7–4.0× when the spacing is halved, as expected for second-order accuracy.
 
-Analytic comparisons use tolerances of 10⁻³ mm for displacement, 10⁻² % for volume change and 10⁻³ for image intensity.
+Linear-field comparisons use tolerances of 10⁻³ mm for displacement, 10⁻² % for volume change and 10⁻³ for image intensity. To pass, non-linear tests require displacement to agree within 10⁻³ mm (grid) or 10⁻⁴ mm (B-spline, TPS), volume change to stay within the truncation bound (plus 10⁻⁴ % for rounding), and the error to fall by 3–5× when the spacing is halved.
 
 **Run it in Slicer:** open the DeformView module and click **Reload and Test**. If the button is hidden, enable developer mode under *Edit → Application Settings → Developer*.
 
