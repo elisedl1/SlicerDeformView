@@ -71,6 +71,12 @@ class DeformViewTest(ScriptedLoadableModuleTest):
         self.test_AffineScalingObliqueVolume()
         self.setUp()
         self.test_GridTransformAnalytic()
+        self.setUp()
+        self.test_NonLinearGridTransform()
+        self.setUp()
+        self.test_NonLinearBSplineTransform()
+        self.setUp()
+        self.test_NonLinearThinPlateSplineTransform()
 
     # ------------------------------------------------------------------ helpers
 
@@ -405,3 +411,265 @@ class DeformViewTest(ScriptedLoadableModuleTest):
                              "Transform was loaded as linear; expected a grid transform")
             self._checkAffineField(referenceVolume, voxels, transformNode, matrix, centre, points, caseName)
         self.delayDisplay("Passed: grid transform (analytic)")
+
+
+    
+    # DeformView computes the Jacobian with
+    # central finite differences on the voxel grid. For a linear field these
+    # are exact, but for a curved field the derivative along axis j has a
+    # truncation error of at most (h_j^2 / 6) * max|d^3 u_i / dx_j^3|, where
+    # h_j is the voxel spacing. That per-entry error is propagated to the
+    # determinant with Hadamard's inequality:
+    #     |det(G + E) - det(G)| <= prod_j(|g_j| + |e_j|) - prod_j |g_j|
+    # (g_j, e_j = columns of the true gradient G and of the error bound E).
+    # The resulting bound is proportional to h^2. Each field is tested at two
+    # resolutions, and halving the spacing must cut the error by about 4x.
+    # ======================================================================
+
+    NONLINEAR_EXTENT_MM = 40.0
+    NONLINEAR_SPACINGS = ((1.0, 1.2, 1.5), (0.5, 0.6, 0.75))  # coarse, then half
+    TRUNCATION_SAFETY = 1.5         # margin on numerically estimated third derivatives
+    REFERENCE_SLACK_PERCENT = 1e-4  # reference-Jacobian and ITK-vs-VTK round-off
+    IMPLEMENTATION_TOL_MM = 1e-4    # DeformView (ITK) vs Slicer (VTK) displacement
+    H2_RATIO_RANGE = (3.0, 5.0)     # error(h) / error(h/2); exactly 4 for pure h^2
+
+    # Smooth field shared by the tests: amplitudes (mm) and wavenumbers (1/mm).
+    SINE_AMPLITUDE = np.array([2.0, 1.5, 1.0])
+    SINE_WAVENUMBER = 2.0 * np.pi / np.array([40.0, 36.0, 44.0])
+    LPS_TO_RAS = np.array([-1.0, -1.0, 1.0])  # same flip in both directions
+
+    # ------------------------------------------------------------ helpers
+
+    def _makeCubeVolume(self, name, spacing):
+        """Reference volume covering the same ~40 mm cube at any spacing."""
+        dims = [int(round(self.NONLINEAR_EXTENT_MM / s)) + 1 for s in spacing]  # i, j, k
+        return self._makeReferenceVolume(name, shapeKJI=tuple(dims[::-1]), spacing=spacing)
+
+    def _fromParentLPS(self, transformNode, pointsLPS):
+        """Evaluate Slicer's own (VTK) resampling transform at LPS points.
+
+        This is an implementation independent of DeformView's ITK path, used as
+        the reference for transforms without a closed-form expression.
+        """
+        from vtk.util.numpy_support import numpy_to_vtk, vtk_to_numpy
+        flatRAS = np.ascontiguousarray(pointsLPS.reshape(-1, 3) * self.LPS_TO_RAS, dtype=np.float64)
+        inPoints = vtk.vtkPoints()
+        inPoints.SetData(numpy_to_vtk(flatRAS, deep=True))
+        outPoints = vtk.vtkPoints()
+        outPoints.SetDataTypeToDouble()  # single precision would ruin the finite differences
+        transformNode.GetTransformFromParent().TransformPoints(inPoints, outPoints)
+        outRAS = vtk_to_numpy(outPoints.GetData())
+        return (outRAS * self.LPS_TO_RAS).reshape(pointsLPS.shape)
+
+    @staticmethod
+    def _finiteDifferenceGradient(evaluate, points, delta=1e-3):
+        """Gradient G[..., i, j] = dT_i/dx_j by fine central differences (delta in mm)."""
+        columns = [(evaluate(points + delta * e) - evaluate(points - delta * e)) / (2.0 * delta)
+                   for e in np.eye(3)]
+        return np.stack(columns, axis=-1)
+
+    @staticmethod
+    def _thirdDerivativeMax(evaluate, points, delta=0.25):
+        """M[i, j] = max over the volume of |d^3 u_i / dx_j^3|, by finite differences."""
+        result = np.zeros((3, 3))
+        for j, e in enumerate(np.eye(3)):
+            f = lambda s: evaluate(points + s * delta * e)
+            third = (f(2) - 2.0 * f(1) + 2.0 * f(-1) - f(-2)) / (2.0 * delta ** 3)
+            result[:, j] = np.abs(third).reshape(-1, 3).max(axis=0)
+        return result
+
+    @staticmethod
+    def _truncationBound(gradient, thirdMax, spacing, safety):
+        """Per-voxel bound on |det(finite-difference gradient) - det(true gradient)|.
+
+        Entry bound e_ij = safety * (h_j^2 / 6) * M_ij, propagated through the
+        determinant with Hadamard's inequality (see comment at the top).
+        """
+        entryBound = safety * thirdMax * (np.asarray(spacing, dtype=np.float64) ** 2 / 6.0)[None, :]
+        gradientColumnNorms = np.linalg.norm(gradient, axis=-2)
+        errorColumnNorms = np.linalg.norm(entryBound, axis=0)
+        return (np.prod(gradientColumnNorms + errorColumnNorms, axis=-1)
+                - np.prod(gradientColumnNorms, axis=-1))
+
+    def _sineField(self, points, centre):
+        """u_i(x) = a_i sin(k_i (x_i - c_i)), with its exact gradient and third-derivative maxima."""
+        a, k = self.SINE_AMPLITUDE, self.SINE_WAVENUMBER
+        displacement = a * np.sin(k * (points - centre))
+        gradient = np.zeros(points.shape + (3,))
+        for i in range(3):
+            gradient[..., i, i] = 1.0 + a[i] * k[i] * np.cos(k[i] * (points[..., i] - centre[i]))
+        return displacement, gradient, np.diag(a * k ** 3)
+
+    def _checkNonLinearCase(self, caseName, buildTransform):
+        """Run DeformView on a non-linear field at two resolutions and check both maps.
+
+        buildTransform(referenceVolume, points, centre) returns
+        (transformNode, analytic). analytic is None when the reference comes
+        from Slicer's own evaluation of the transform, or a dict with
+        'displacement', 'gradient', 'thirdMax' and optionally 'discreteJacobian'.
+        """
+        logic = self._logic()
+        inner = (slice(1, -1),) * 3  # central differences are one-sided at the border
+        maxJacobianErrors = []
+
+        for level, spacing in enumerate(self.NONLINEAR_SPACINGS):
+            slicer.mrmlScene.Clear()
+            referenceVolume, voxels = self._makeCubeVolume(f"NonLinearReference{level}", spacing)
+            points = self._physicalPointsLPS(referenceVolume)
+            centre = points.reshape(-1, 3).mean(axis=0)
+            transformNode, analytic = buildTransform(referenceVolume, points, centre)
+            label = f"{caseName}, spacing {spacing}"
+
+            if analytic is None:
+                evaluate = lambda q: self._fromParentLPS(transformNode, q)
+                expectedDisplacement = evaluate(points) - points
+                gradient = self._finiteDifferenceGradient(evaluate, points)
+                thirdMax = self._thirdDerivativeMax(evaluate, points)
+                displacementTol = self.IMPLEMENTATION_TOL_MM
+            else:
+                expectedDisplacement = analytic["displacement"]
+                gradient = analytic["gradient"]
+                thirdMax = analytic["thirdMax"]
+                displacementTol = self.DISPLACEMENT_TOL_MM
+
+            colorId = self._colorId()
+            try:
+                displacementVolume = logic.computeDisplacementMagnitude(
+                    referenceVolume, transformNode, colorId, scale=1.0)
+                jacobianVolume = logic.computeJacobianMagnitude(referenceVolume, transformNode, colorId)
+            except Exception as error:
+                self.fail(f"{caseName}: DeformView could not process this transform type: {error}")
+
+            # Displacement is sampled exactly at voxel centres: no truncation error.
+            displacement = self._checkVolume(displacementVolume, voxels.shape)
+            self._assertMaxError(displacement, np.linalg.norm(expectedDisplacement, axis=-1),
+                                 displacementTol, f"{label} displacement (mm)")
+
+            # Jacobian: error must stay within the h^2 truncation bound at every interior voxel.
+            jacobian = self._checkVolume(jacobianVolume, voxels.shape)
+            expectedJacobian = (np.linalg.det(gradient) - 1.0) * 100.0
+            bound = 100.0 * self._truncationBound(gradient, thirdMax, spacing, self.TRUNCATION_SAFETY)
+            error = np.abs(jacobian[inner] - expectedJacobian[inner])
+            allowed = bound[inner] + self.REFERENCE_SLACK_PERCENT
+            worstFraction = float(np.max(error / allowed))
+            maxJacobianErrors.append(float(error.max()))
+            self.maxErrors[f"{label} volume change (%)"] = float(error.max())
+            logging.info(f"DeformViewTest {label} volume change (%): max abs error = {error.max():.3e}, "
+                         f"max h^2 bound = {bound[inner].max():.3e}, worst error/bound = {worstFraction:.2f}")
+            self.assertLessEqual(
+                worstFraction, 1.0,
+                f"{label}: volume-change error exceeds the h^2 truncation bound "
+                f"(worst error/bound = {worstFraction:.2f})")
+
+            # Optional exact check: the result must equal the central-difference formula itself.
+            if analytic is not None and "discreteJacobian" in analytic:
+                self._assertMaxError(jacobian[inner], analytic["discreteJacobian"][inner], 1e-6,
+                                     f"{label} volume change vs exact central-difference value (%)")
+
+        ratio = maxJacobianErrors[0] / maxJacobianErrors[1]
+        logging.info(f"DeformViewTest {caseName}: error ratio when spacing is halved = {ratio:.2f} "
+                     f"(4.0 expected for second-order accuracy)")
+        low, high = self.H2_RATIO_RANGE
+        self.assertTrue(low <= ratio <= high,
+                        f"{caseName}: halving the spacing changed the error by {ratio:.2f}x; "
+                        f"expected about 4x for second-order accuracy")
+
+    # -------------------------------------------------------------- tests
+
+    def test_NonLinearGridTransform(self):
+        """Sinusoidal field as a grid (displacement-field) transform.
+
+        The field is sampled on the reference grid, so displacement is exact at
+        every voxel. The Jacobian has a closed form, and so does its
+        central-difference approximation (each derivative is scaled by
+        sin(k h) / (k h)), which DeformView must reproduce exactly.
+        """
+        self.delayDisplay("Starting: non-linear grid transform")
+
+        def build(referenceVolume, points, centre):
+            displacement, gradient, thirdMax = self._sineField(points, centre)
+            image = sitkUtils.PullVolumeFromSlicer(referenceVolume)
+            field = sitk.GetImageFromArray(displacement.astype(np.float64), isVector=True)
+            field.SetOrigin(image.GetOrigin())
+            field.SetSpacing(image.GetSpacing())
+            field.SetDirection(image.GetDirection())
+            transformNode = self._loadSitkTransform(sitk.DisplacementFieldTransform(field))
+            self.assertFalse(transformNode.IsLinear(), "Grid transform was loaded as linear")
+
+            a, k = self.SINE_AMPLITUDE, self.SINE_WAVENUMBER
+            h = np.array(image.GetSpacing())  # default orientation: index axis i <-> physical axis i
+            sinc = np.sin(k * h) / (k * h)
+            discrete = 100.0 * (np.prod(1.0 + a * k * np.cos(k * (points - centre)) * sinc, axis=-1) - 1.0)
+            return transformNode, {"displacement": displacement, "gradient": gradient,
+                                   "thirdMax": thirdMax, "discreteJacobian": discrete}
+
+        self._checkNonLinearCase("non-linear grid", build)
+        self.delayDisplay("Passed: non-linear grid transform")
+
+    def test_NonLinearBSplineTransform(self):
+        """Cubic B-spline transform with smooth, sinusoidal control-point coefficients.
+
+        The control grid covers the same physical cube at both resolutions, so
+        the same continuous field is tested at each spacing. The reference is
+        Slicer's own (VTK) evaluation of the transform.
+        """
+        self.delayDisplay("Starting: non-linear B-spline transform")
+
+        def build(referenceVolume, points, centre):
+            image = sitkUtils.PullVolumeFromSlicer(referenceVolume)
+            box = sitk.Image([5, 5, 5], sitk.sitkFloat32)  # 40 mm cube, independent of voxel spacing
+            box.SetSpacing((10.0, 10.0, 10.0))
+            box.SetOrigin(image.GetOrigin())
+            box.SetDirection(image.GetDirection())
+            bspline = sitk.BSplineTransformInitializer(box, [4, 4, 4], order=3)
+
+            fixed = np.array(bspline.GetFixedParameters())
+            meshSize, gridOrigin, gridSpacing = fixed[0:3].astype(int), fixed[3:6], fixed[6:9]
+            gridDirection = fixed[9:18].reshape(3, 3)
+            counts = meshSize + 3  # control points per axis for a cubic B-spline
+            k, j, i = np.meshgrid(*[np.arange(n) for n in counts[::-1]], indexing="ij")
+            controlPoints = gridOrigin + (np.stack([i, j, k], axis=-1) * gridSpacing) @ gridDirection.T
+            coefficients = 0.6 * self.SINE_AMPLITUDE * np.sin(
+                self.SINE_WAVENUMBER * (controlPoints - centre) + np.array([0.3, 1.1, 2.0]))
+            bspline.SetParameters(tuple(np.concatenate([coefficients[..., d].ravel() for d in range(3)])))
+
+            transformNode = self._loadSitkTransform(bspline)
+            self.assertFalse(transformNode.IsLinear(), "B-spline transform was loaded as linear")
+            return transformNode, None
+
+        self._checkNonLinearCase("non-linear B-spline", build)
+        self.delayDisplay("Passed: non-linear B-spline transform")
+
+    def test_NonLinearThinPlateSplineTransform(self):
+        """Thin-plate spline transform built from landmarks in Slicer.
+
+        26 landmarks sit on a shell 15 mm outside the volume, so the spline is
+        smooth everywhere inside it. The reference is Slicer's own (VTK)
+        evaluation of the transform.
+        """
+        self.delayDisplay("Starting: non-linear thin-plate spline transform")
+
+        def build(referenceVolume, points, centre):
+            flat = points.reshape(-1, 3)
+            low, high = flat.min(axis=0) - 15.0, flat.max(axis=0) + 15.0
+            axes = [[low[d], 0.5 * (low[d] + high[d]), high[d]] for d in range(3)]
+            lattice = np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
+            source = np.delete(lattice, 13, axis=0)  # drop the centre point: no landmark inside the volume
+            target = source + 1.5 * np.sin(self.SINE_WAVENUMBER * (source - centre) + np.array([0.5, 1.3, 2.1]))
+
+            sourcePoints, targetPoints = vtk.vtkPoints(), vtk.vtkPoints()
+            for s, t in zip(source * self.LPS_TO_RAS, target * self.LPS_TO_RAS):
+                sourcePoints.InsertNextPoint(*s)
+                targetPoints.InsertNextPoint(*t)
+            tps = vtk.vtkThinPlateSplineTransform()
+            tps.SetBasisToR()  # the 3D thin-plate spline kernel, as used by ITK
+            tps.SetSourceLandmarks(sourcePoints)
+            tps.SetTargetLandmarks(targetPoints)
+
+            transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ThinPlateSpline")
+            transformNode.SetAndObserveTransformFromParent(tps)
+            self.assertFalse(transformNode.IsLinear(), "Thin-plate spline transform reported as linear")
+            return transformNode, None
+
+        self._checkNonLinearCase("non-linear thin-plate spline", build)
+        self.delayDisplay("Passed: non-linear thin-plate spline transform")
