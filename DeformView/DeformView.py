@@ -3280,10 +3280,11 @@ class DeformViewLogic(ScriptedLoadableModuleLogic):
         array = sitk.GetArrayFromImage(dispMag)
         minVal, maxVal = float(array.min()), float(array.max())
         displayNode.SetWindow(maxVal - minVal)
-        displayNode.SetLevel((maxVal + minVal) / 3.0)
+        displayNode.SetLevel((maxVal + minVal) / 2.0)
 
         # Apply threshold for visibility
-        displayNode.SetThreshold(0.05, 10.0)
+        lowerThreshold = minVal + 0.009 * (maxVal - minVal)
+        displayNode.SetThreshold(lowerThreshold, maxVal)
         displayNode.SetApplyThreshold(True)
 
         # Use specific color map if available
