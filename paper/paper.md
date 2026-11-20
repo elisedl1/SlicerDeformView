@@ -50,13 +50,13 @@ DeformView is a new 3D Slicer module [@fedorov2012] that introduces dense and in
 
 # Statement of need
 
-Non-linear image registration is a key task in medical imaging, where a spatially varying deformation field maps a source image onto a fixed target image. There is an extensive body of work on non-linear registration methods, reflecting its broad applicability across imaging modalities [@sotiras2013; @ferrante2017]. While the primary output of a registration pipeline is the deformed source image – warped into alignment with the target image – the underlying deformation field itself encodes quantitative information about spatial correspondences and local tissue mechanics. 
+Non-linear image registration is a key task in medical imaging, where a spatially varying deformation field maps a source image onto a fixed target image. There is an extensive body of work on non-linear registration methods, reflecting its broad applicability across imaging modalities [@sotiras2013; @ferrante2017]. While the primary output of a registration pipeline is the deformed source image - warped into alignment with the target image - the underlying deformation field itself encodes quantitative information about spatial correspondences and local tissue mechanics. 
 
 Clinicians must interpret these resulting deformation fields, either to guide clinical decision-making or to validate that a registration algorithm is performing correctly. However, existing deformation software for non-linear image registration is largely sparse and qualitative, making it difficult to interpret and localize tissue deformation [@brock2017]. For example, how far tissue moved near a structure of interest or where volume was lost or gained. Correct interpretation of deformed anatomy is especially difficult for inexperienced surgeons or researchers.
 
 The displacement magnitude and Jacobian determinant address these concerns bceause they quantify how many millimetres tissue has been displaced near the resection margin. 
 
-For example, in image-guided neurosurgery (IGNS), patient-to-image registration is used to align preoperative scans with patient anatomy during surgery. ‘Brain shift’, or non-linear shifts in brain tissue, causes a mismatch between preoperative images and the patient’s current anatomy, necessitating the use of non-linear image registration to deform preoperative images into the intraoperative image space [@abhari2014]. Other use cases include longitudinal studies to monitor disease progression or interventional guidance to maximize therapeutic precision. As non-linear image registration is a general problem, these use cases extend across many anatomical systems and modalities.
+For example, in image-guided neurosurgery (IGNS), patient-to-image registration is used to align preoperative scans with patient anatomy during surgery. 'Brain shift', or non-linear shifts in brain tissue, causes a mismatch between preoperative images and the patient's current anatomy, necessitating the use of non-linear image registration to deform preoperative images into the intraoperative image space [@abhari2014]. Other use cases include longitudinal studies to monitor disease progression or interventional guidance to maximize therapeutic precision. As non-linear image registration is a general problem, these use cases extend across many anatomical systems and modalities.
 
 DeformView addresses these challenges by computing dense, voxel-wise maps of displacement magnitude and local volume change that can be inspected interactively and used in quantitative analysis where deformation is required.
 
@@ -97,7 +97,7 @@ The first new dense colour map renders the Euclidean magnitude of the displaceme
 This map renders the Jacobian determinant of the deformation field at every voxel as a percentage of local volumetric change, indicating whether a region has expanded or contracted under the deformation [@chung2001]. Tissue expansion (percentage > 0%) is rendered in red, tissue compression (percentage < 0%) in blue, and no change (percentage = 0%) in white, as shown in \autoref{fig:four_plot}. This allows researchers to identify changes to anatomical regions or areas of physiologically implausible deformation that may indicate registration errors.
 
 ### Increment Transform
-Rather than only displaying the final deformation, as existing modules do, the transformation is incrementally applied to the source image across 10 discrete steps (0.1x, 0.2x, … 1.0x of the full transform), allowing users to observe how the deformation accumulates spatially. This is particularly useful for training and for diagnosing registration behaviour at intermediate stages. It should be noted that, while displacement magnitudes at intermediate steps are exact, intermediate Jacobian values are a linear approximation of the full-transform values. 
+Rather than only displaying the final deformation, as existing modules do, the transformation is incrementally applied to the source image across 10 discrete steps (0.1x, 0.2x, ... 1.0x of the full transform), allowing users to observe how the deformation accumulates spatially. This is particularly useful for training and for diagnosing registration behaviour at intermediate stages. It should be noted that, while displacement magnitudes at intermediate steps are exact, intermediate Jacobian values are a linear approximation of the full-transform values. 
 
 We visualize the difference between DeformView visualization compared to the existing 3D Slicer functionality in Transform module for both displaying displacement magnitude and local volume change (compression/ expansion) in \autoref{fig:four_plot}.
 
@@ -112,18 +112,18 @@ DeformView includes an automated self-test built on Slicer's `ScriptedLoadableMo
 |---|---|---|---|---|
 | Translation; affine (default and oblique orientation) | Linear | Analytic | < 10^-13^ mm | < 10^-14^ |
 | Affine (default and oblique orientation) | Grid | Analytic | < 10^-13^ mm | < 10^-14^ |
-| Sinusoidal (non-linear) | Grid | Analytic | < 10^-13^ mm | 1.6 × 10^-3^ |
-| Smooth curved (non-linear) | B-spline | Slicer evaluation | < 10^-13^ mm | 1.8 × 10^-4^ |
-| Smooth curved (non-linear) | Thin-plate spline | Slicer evaluation | < 10^-13^ mm | 1.1 × 10^-5^ |
+| Sinusoidal (non-linear) | Grid | Analytic | < 10^-13^ mm | 1.6 x 10^-3^ |
+| Smooth curved (non-linear) | B-spline | Slicer evaluation | < 10^-13^ mm | 1.8 x 10^-4^ |
+| Smooth curved (non-linear) | Thin-plate spline | Slicer evaluation | < 10^-13^ mm | 1.1 x 10^-5^ |
 
-: Maximum absolute error against the reference. All tests use anisotropic voxel spacing. Jacobian errors are over interior voxels; curved-field values are at 0.5–0.75 mm spacing. \label{tab:validation}
+: Maximum absolute error against the reference. All tests use anisotropic voxel spacing. Jacobian errors are over interior voxels; curved-field values are at 0.5-0.75 mm spacing. \label{tab:validation}
 
 From \autoref{tab:validation}, DeformView reproduces every linear deformation field to floating-point precision. On non-linear deformation fields (sinusoidal grid, B-spline, TPS), the Jacobian determinant has a small discretization error because DeformView estimates derivatives by central differences between neighbouring voxels. At every interior voxel, the difference from the reference Jacobian determinant stayed within the theoretical central-difference bound and fell 3.7-4.0x when voxel spacing was halved, as expected for second-order (h^2^) accuracy. The largest error at 0.5-0.75 mm spacing was 1.6x10^-3^ on the sinusoidal grid, which was deliberately strongly curved (determinant ranges from 0.44 to 1.89; volume change -56% to +89%) across the field. On less strongly curved non-linear fields, much smaller errors occurred: 1.8x10^-4^ for the B-spline field and 1.1x10^-5^ for the TPS field. 
 
 
 # AI usage disclosure
 
-Generative AI tools (Claude, Anthropic; including Claude Sonnet 4.6) were used for debugging during software development, including testing and validation scripts; and for editing tone in parts of the manuscript and the README testing documentation. The authors reviewed, ran, and validated all AI-assisted code, and made all design decisions.
+Generative AI tools (Claude, Anthropic; including Claude Sonnet 4.6) were used for debugging during software development, including testing and validation scripts; and for editing parts of the manuscript, including table formatting in the Validation section, and the README testing documentation. The authors reviewed, ran, and validated all AI-assisted code, and made all design decisions.
 
 
 # References
