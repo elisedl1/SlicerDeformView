@@ -123,7 +123,8 @@ From \autoref{tab:validation}, DeformView reproduces every linear deformation fi
 
 # AI usage disclosure
 
-Generative AI tools (Claude Sonnet 4.6) were used in the development of this software, specifically for debugging purposes. Authors have reviewed and validated all AI-assisted code output and made all core design decisions. AI was not used for writing this manuscript, or the preparation of supporting materials. 
+Generative AI tools (Claude, Anthropic; including Claude Sonnet 4.6) were used for debugging during software development, including testing and validation scripts; and for editing tone in parts of the manuscript and the README testing documentation. The authors reviewed, ran, and validated all AI-assisted code, and made all design decisions.
+
 
 # References
 
